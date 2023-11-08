@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Página Inicial</title>
+</head>
+<body>
+    <script>
+        let numProcessos;
+        let quantum;
+        let sobrecarga;
+        let tempoChegada = [];
+
+        function pedirQuantidadeProcessos() {
+            numProcessos = parseInt(prompt("Quantidade de processos:"));
+            pedirQuantum();
+        }
+
+        function pedirQuantum() {
+            quantum = parseInt(prompt("Valor do quantum:"));
+            pedirSobrecarga();
+        }
+
+        function pedirSobrecarga() {
+            sobrecarga = parseInt(prompt("Valor da sobrecarga:"));
+            pedirTempoChegada(0);
+        }
+
+        function pedirTempoChegada(index) {
+            if (index < numProcessos) {
+                let chegada = parseInt(prompt(`Tempo de chegada do processo ${index + 1}:`));
+                tempoChegada.push(chegada);
+                pedirTempoChegada(index + 1);
+            } else {
+                console.log("Quantidade de Processos:", numProcessos);
+                console.log("Quantum:", quantum);
+                console.log("Sobrecarga:", sobrecarga);
+                console.log("Tempos de Chegada:", tempoChegada);
+            }
+        }
+
+        pedirQuantidadeProcessos();
+    </script>
+</body>
+</html>
