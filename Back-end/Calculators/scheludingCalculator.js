@@ -108,4 +108,4 @@ class SchedulingCalculator {
     }
 }
 
-export default SchedulingCalculator;
+module.exports = SchedulingCalculator;
