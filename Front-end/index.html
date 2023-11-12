@@ -1,44 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Página Inicial</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página inicial</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            margin-bottom: 10px;
+            width: 300px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
+    <header>Digite os dados do sistema e de cada processo</header>
+
+    <div id="inputs-container">
+        <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
+    </div>
+
     <script>
         let numProcessos;
         let quantum;
         let sobrecarga;
-        let tempoChegada = [];
+        let processos = [];
 
         function pedirQuantidadeProcessos() {
-            numProcessos = parseInt(prompt("Quantidade de processos:"));
+            numProcessos = parseInt(document.getElementById("quantidade-processos").value);
+            limparInputs();
             pedirQuantum();
         }
 
         function pedirQuantum() {
-            quantum = parseInt(prompt("Valor do quantum:"));
-            pedirSobrecarga();
+            const inputQuantum = criarInput("number", "Valor do quantum");
+            inputQuantum.addEventListener("change", () => {
+                quantum = parseInt(inputQuantum.value);
+                limparInputs();
+                pedirSobrecarga();
+            });
+            document.getElementById("inputs-container").appendChild(inputQuantum);
         }
 
         function pedirSobrecarga() {
-            sobrecarga = parseInt(prompt("Valor da sobrecarga:"));
-            pedirTempoChegada(0);
+            const inputSobrecarga = criarInput("number", "Valor da sobrecarga");
+            inputSobrecarga.addEventListener("change", () => {
+                sobrecarga = parseInt(inputSobrecarga.value);
+                limparInputs();
+                pedirProcessos(0);
+            });
+            document.getElementById("inputs-container").appendChild(inputSobrecarga);
         }
 
-        function pedirTempoChegada(index) {
+        function pedirProcessos(index) {
             if (index < numProcessos) {
-                let chegada = parseInt(prompt(`Tempo de chegada do processo ${index + 1}:`));
-                tempoChegada.push(chegada);
-                pedirTempoChegada(index + 1);
+                const inputTempoChegada = criarInput("number", `Tempo de chegada do processo ${index + 1}`);
+                const inputTempoExecucao = criarInput("number", `Tempo de execução do processo ${index + 1}`);
+                const inputDeadline = criarInput("number", `Deadline do processo ${index + 1}`);
+
+                const divProcesso = document.createElement("div");
+                divProcesso.appendChild(inputTempoChegada);
+                divProcesso.appendChild(inputTempoExecucao);
+                divProcesso.appendChild(inputDeadline);
+
+                document.getElementById("inputs-container").appendChild(divProcesso);
+
+                const proximoIndex = index + 1;
+
+                inputDeadline.addEventListener("change", () => {
+                    processos.push({
+                        tempoChegada: parseInt(inputTempoChegada.value),
+                        tempoExecucao: parseInt(inputTempoExecucao.value),
+                        deadline: parseInt(inputDeadline.value)
+                    });
+
+                    limparInputs();
+                    pedirProcessos(proximoIndex);
+                });
             } else {
                 console.log("Quantidade de Processos:", numProcessos);
                 console.log("Quantum:", quantum);
                 console.log("Sobrecarga:", sobrecarga);
-                console.log("Tempos de Chegada:", tempoChegada);
+                console.log("Processos:", processos);
             }
         }
 
-        pedirQuantidadeProcessos();
+        function criarInput(type, placeholder) {
+            const input = document.createElement("input");
+            input.type = type;
+            input.placeholder = placeholder;
+            return input;
+        }
+
+        function limparInputs() {
+            document.getElementById("inputs-container").innerHTML = "";
+        }
+
+        document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
     </script>
 </body>
 </html>
