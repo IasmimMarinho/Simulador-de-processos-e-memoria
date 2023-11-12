@@ -1,3 +1,69 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+input {
+  width: 300px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-right: 2px;
+  outline: none;
+}
+
+/* Estilizar o input quando estiver em foco */
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+button {
+  width: 100px;
+  padding: 10px;
+  background-color: #4CAF50; 
+  color: white; 
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Transição suave na mudança de cor de fundo */
+}
+
+/* Estilizar o botão quando hover (passar o mouse sobre) */
+button:hover {
+  background-color: #45a049; 
+}
+
+/* Estilizar o botão quando em foco */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 128, 0, 0.7); /* Sombra sutil em foco */
+}
+#inputs-container{ 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#container_view {
+  background-color: #D3D3D3;
+  width: 95%;
+  height: 100%;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 4px;
+}
 #container {
   max-width: 800px;
   margin: 1em auto;

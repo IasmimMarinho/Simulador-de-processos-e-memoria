@@ -5,33 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/gantt.js"></script>
-    <title>Página inicial</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Escalonador de processos</title>
 
-        header {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        input {
-            margin-bottom: 10px;
-            width: 300px;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-    </style>
 </head>
 <body>
-     <header>Digite os dados do sistema e de cada processo</header>
-
+    <div id="container_view">
+    <header id="cabecalho">Digite os dados do sistema e de cada processo</header>
     <div id="inputs-container">
         <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
     </div> 
@@ -41,7 +21,8 @@
         let quantum;
         let sobrecarga;
         let processos = [];
-
+        var header = document.getElementById("cabecalho");
+        
         function pedirQuantidadeProcessos() {
             numProcessos = parseInt(document.getElementById("quantidade-processos").value);
             limparInputs();
@@ -94,6 +75,7 @@
                     pedirProcessos(proximoIndex);
                 });
             } else {
+                header.innerHTML = "Escolha o algoritmo de escalonamento";
                 console.log("Quantidade de Processos:", numProcessos);
                 console.log("Quantum:", quantum);
                 console.log("Sobrecarga:", sobrecarga);
@@ -193,5 +175,6 @@
     </script>
 
     <div id="container"></div>
+</div>
 </body>
 </html>
