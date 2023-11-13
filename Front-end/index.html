@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/gantt.js"></script>
+    <script src="../Back-end/scheludingCalculator.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <title>Escalonador de processos</title>
 
@@ -20,7 +21,7 @@
         let numProcessos;
         let quantum;
         let sobrecarga;
-        let processos = [];
+        let processes = [];
         var header = document.getElementById("cabecalho");
         
         function pedirQuantidadeProcessos() {
@@ -65,9 +66,9 @@
                 const proximoIndex = index + 1;
 
                 inputDeadline.addEventListener("change", () => {
-                    processos.push({
-                        tempoChegada: parseInt(inputTempoChegada.value),
-                        tempoExecucao: parseInt(inputTempoExecucao.value),
+                    processes.push({
+                        arrival: parseInt(inputTempoChegada.value),
+                        execution: parseInt(inputTempoExecucao.value),
                         deadline: parseInt(inputDeadline.value)
                     });
 
@@ -79,15 +80,29 @@
                 console.log("Quantidade de Processos:", numProcessos);
                 console.log("Quantum:", quantum);
                 console.log("Sobrecarga:", sobrecarga);
-                console.log("Processos:", processos);
+                console.log("Processos:", processes);
+
+                const calculator = new SchedulingCalculator(JSON.parse(JSON.stringify(processes)), quantum, sobrecarga);
+
+                const fifoResult = calculator.fifo();
+                console.log("Turnaround FIFO: ", fifoResult);
+                const sjfResult = calculator.sjf();
+                console.log("Turnaround SJF: ", sjfResult);
+                const roundRobinResult = calculator.roundRobin();
+                console.log("Turnaround Round Robin: ", roundRobinResult);
+                const edfResult = calculator.edf();
+                console.log("Turnaround EDF: ", edfResult);
+
                 const fifo = criarButton("FIFO", "1");
                 const sjf = criarButton("SJF", "2");
                 const roundRobin = criarButton("Round Robin", "3");
                 const edf = criarButton("EDF", "4");
+
                 document.getElementById("inputs-container").appendChild(fifo);
                 document.getElementById("inputs-container").appendChild(sjf);
                 document.getElementById("inputs-container").appendChild(roundRobin);
                 document.getElementById("inputs-container").appendChild(edf);
+
                 fifo.addEventListener("click", getGraphic);  
                 sjf.addEventListener("click", getGraphic);  
                 roundRobin.addEventListener("click", getGraphic);  
