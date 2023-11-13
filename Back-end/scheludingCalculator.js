@@ -13,7 +13,6 @@ class SchedulingCalculator {
 
         let acc = 0;
         let remaining = JSON.parse(JSON.stringify(this.processes));
-        console.log(remaining)
         let total = remaining[0].arrival;
 
         for (let i = 0; i < remaining.length; i++) {
@@ -36,7 +35,6 @@ class SchedulingCalculator {
         let acc = 0;
         let total = 0;
         let remaining = JSON.parse(JSON.stringify(this.processes));
-        console.log(remaining)
 
         while (remaining.length > 0) {
             let available = remaining.filter(process => process.arrival <= total);
@@ -65,7 +63,6 @@ class SchedulingCalculator {
         let acc = 0;
         let total = 0;
         let remaining = JSON.parse(JSON.stringify(this.processes));
-        console.log(remaining)
         let currentTime = 0;
 
         while (remaining.length > 0) {
@@ -102,7 +99,6 @@ class SchedulingCalculator {
         let acc = 0;
         let total = 0;
         let remaining = JSON.parse(JSON.stringify(this.processes));
-        console.log(remaining)
         let currentTime = 0;
 
         while (remaining.length > 0) {
