@@ -51,11 +51,20 @@ button:focus {
   outline: none;
   box-shadow: 0 0 5px rgba(0, 128, 0, 0.7); /* Sombra sutil em foco */
 }
+
 #inputs-container{ 
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+/* Remove setinhas dos inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 #container_view {
   background-color: #D3D3D3;
   width: 95%;
