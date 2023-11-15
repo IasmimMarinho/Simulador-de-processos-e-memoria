@@ -67,23 +67,27 @@ class SchedulingCalculator {
 
         while (remaining.length > 0) {
             let arrivedProcesses = remaining.filter(process => process.arrival <= currentTime);
-            let next = arrivedProcesses.shift();
-            let executionTime = Math.min(this.quantum, next.execution);
+            if (arrivedProcesses.length > 0) {
+                let next = arrivedProcesses.shift();
+                let executionTime = Math.min(this.quantum, next.execution);
 
-            total = currentTime;
-            total += executionTime;
-            acc += total - next.arrival;
-            next.execution -= executionTime;
-            remaining = remaining.filter(process => process !== next);
+                total = currentTime;
+                total += executionTime;
+                acc += total - next.arrival;
+                next.execution -= executionTime;
+                remaining = remaining.filter(process => process !== next);
 
-            if (next.execution > 0) {
-                currentTime = total + this.overhead;
-                acc += this.overhead;
-                next.arrival = currentTime;
-                remaining.push(next);
-                remaining.sort((a, b) => a.arrival - b.arrival);
+                if (next.execution > 0) {
+                    currentTime = total + this.overhead;
+                    acc += this.overhead;
+                    next.arrival = currentTime;
+                    remaining.push(next);
+                    remaining.sort((a, b) => a.arrival - b.arrival);
+                } else {
+                    currentTime = total;
+                }
             } else {
-                currentTime = total;
+                currentTime++;
             }
         }
 
@@ -95,6 +99,10 @@ class SchedulingCalculator {
             console.error('processes empty');
             return 0;
         }
+
+        this.processes.forEach(process => {
+            process.deadline += process.arrival;
+        });
 
         let acc = 0;
         let total = 0;
