@@ -97,7 +97,6 @@
                 const sjf = criarButton("SJF", "2");
                 const roundRobin = criarButton("Round Robin", "3");
                 const edf = criarButton("EDF", "4");
-
                 document.getElementById("inputs-container").appendChild(fifo);
                 document.getElementById("inputs-container").appendChild(sjf);
                 document.getElementById("inputs-container").appendChild(roundRobin);
@@ -131,62 +130,53 @@
         document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
 
         function getGraphic() {
+            
             Highcharts.ganttChart('container', {
-            title: {
-            text: 'Gantt Chart with Progress Indicators',
-            align: 'left'
-            },
 
-            xAxis: {
-            min: Date.UTC(2014, 10, 17),
-            max: Date.UTC(2014, 10, 30)
-            },
+                title: {
+                    text: 'Gantt Chart process scheduler',
+                    align: 'left'
+                },
+                chart: {
+                    borderColor: '#686868',
+                    borderWidth: 2,
+                    animation: {
+                     delay: 1000
+                    }
+                },
 
-            accessibility: {
-            point: {
-                descriptionFormat: '{yCategory}. ' +
-                    '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
-                    'Start {x:%Y-%m-%d}, end {x2:%Y-%m-%d}.'
-            }
-            },
+                xAxis: {
+                    categories: Array.from({ length: 31 }, (_, i) => i), // Gera uma array de 0 a 30
+                    min: 0,
+                    max: 30,
+                },
+                tooltip: {
+                    formatter: function () {
+                        return '<b>' + 'Task: ' + this.point.name + '<br/>' +
+                            'Start: ' + this.point.start + '<br/>' +
+                            'End: ' + this.point.end;
+                    }
+                },
 
-            lang: {
-            accessibility: {
-                axis: {
-                    xAxisDescriptionPlural: 'The chart has a two-part X axis showing time in both week numbers and days.'
-                }
-            }
-            },
+                accessibility: {
+                    point: {
+                        descriptionFormat: '{yCategory}. ' +
+                            '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
+                            'Start {x}, end {x2}.'
+                    }
+                },
 
-            series: [{
-            name: 'Project 1',
-            data: [{
-                name: 'Start prototype',
-                start: Date.UTC(2014, 10, 18),
-                end: Date.UTC(2014, 10, 25),
-                completed: {
-                    amount: 0.25
-                }
-            }, {
-                name: 'Test prototype',
-                start: Date.UTC(2014, 10, 27),
-                end: Date.UTC(2014, 10, 29)
-            }, {
-                name: 'Develop',
-                start: Date.UTC(2014, 10, 20),
-                end: Date.UTC(2014, 10, 25),
-                completed: {
-                    amount: 0.12,
-                    fill: '#fa0'
-                }
-            }, {
-                name: 'Run acceptance tests',
-                start: Date.UTC(2014, 10, 23),
-                end: Date.UTC(2014, 10, 26)
-            }]
-            }]
+                series: [{
+                    name: 'Project 1',
+                    data: processes.map((item, index) => ({
+                        name: `Processo ${index + 1}`,
+                        start: item.arrival,
+                        end: item.execution,
+                    })),
+                }]
             });
-            }
+        }
+
     </script>
 
     <div id="container"></div>
