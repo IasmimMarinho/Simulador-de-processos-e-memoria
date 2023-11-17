@@ -22,6 +22,7 @@
         let quantum;
         let sobrecarga;
         let processes = [];
+        let selectedAlgorithm;
         var header = document.getElementById("cabecalho");
         
         function pedirQuantidadeProcessos() {
@@ -102,10 +103,10 @@
                 document.getElementById("inputs-container").appendChild(roundRobin);
                 document.getElementById("inputs-container").appendChild(edf);
 
-                fifo.addEventListener("click", getGraphic);  
-                sjf.addEventListener("click", getGraphic);  
-                roundRobin.addEventListener("click", getGraphic);  
-                edf.addEventListener("click", getGraphic);        
+                fifo.addEventListener("click", () => { selectedAlgorithm = fifoResult; getGraphic(); });
+                sjf.addEventListener("click", () => { selectedAlgorithm = sjfResult; getGraphic(); });
+                roundRobin.addEventListener("click", () => { selectedAlgorithm = roundRobinResult; getGraphic(); });
+                edf.addEventListener("click", () => { selectedAlgorithm = edfResult; getGraphic(); });        
             }
         }
 
@@ -126,7 +127,14 @@
         function limparInputs() {
             document.getElementById("inputs-container").innerHTML = "";
         }
+        function getResult(result) {
+            const trResult = result.toFixed(2); 
+            const label = document.createElement("label");
+            label.textContent = `Turnaround: ${trResult}`;
+            document.getElementById("ResultLabel").appendChild(label);
+            return label;
 
+        }
         document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
 
         function getGraphic() {
@@ -141,7 +149,7 @@
                     borderColor: '#686868',
                     borderWidth: 2,
                     animation: {
-                     delay: 1000
+                    defer: 1000
                     }
                 },
 
@@ -172,14 +180,23 @@
                         name: `Processo ${index + 1}`,
                         start: item.arrival,
                         end: item.execution,
+                        color: 'green'
                     })),
+                    // adciona delay
+                    animation: {
+                        defer: 1000,
+                    }
                 }]
             });
+            
+            document.getElementById("ResultLabel").innerHTML = "";
+            getResult(selectedAlgorithm)
         }
 
     </script>
 
     <div id="container"></div>
 </div>
+<label id="ResultLabel"></label>
 </body>
 </html>
