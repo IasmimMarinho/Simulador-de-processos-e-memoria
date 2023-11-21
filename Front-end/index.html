@@ -19,18 +19,19 @@
             <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
         </div>
 
-        <script>
-            let numProcessos;
-            let quantum;
-            let sobrecarga;
-            let processes = [];
-            var header = document.getElementById("cabecalho");
-
-            function pedirQuantidadeProcessos() {
-                numProcessos = parseInt(document.getElementById("quantidade-processos").value);
-                limparInputs();
-                pedirQuantum();
-            }
+    <script>
+        let numProcessos;
+        let quantum;
+        let sobrecarga;
+        let processes = [];
+        let selectedAlgorithm;
+        var header = document.getElementById("cabecalho");
+        
+        function pedirQuantidadeProcessos() {
+            numProcessos = parseInt(document.getElementById("quantidade-processos").value);
+            limparInputs();
+            pedirQuantum();
+        }
 
             function pedirQuantum() {
                 const inputQuantum = criarInput("number", "Valor do quantum");
@@ -104,12 +105,12 @@
                     document.getElementById("inputs-container").appendChild(roundRobin);
                     document.getElementById("inputs-container").appendChild(edf);
 
-                    fifo.addEventListener("click", getGraphic);
-                    sjf.addEventListener("click", getGraphic);
-                    roundRobin.addEventListener("click", getGraphic);
-                    edf.addEventListener("click", getGraphic);
-                }
+                fifo.addEventListener("click", () => { selectedAlgorithm = fifoResult; getGraphic(); });
+                sjf.addEventListener("click", () => { selectedAlgorithm = sjfResult; getGraphic(); });
+                roundRobin.addEventListener("click", () => { selectedAlgorithm = roundRobinResult; getGraphic(); });
+                edf.addEventListener("click", () => { selectedAlgorithm = edfResult; getGraphic(); });        
             }
+        }
 
             function criarButton(title, id) {
                 const button = document.createElement("button");
@@ -125,11 +126,18 @@
                 return input;
             }
 
-            function limparInputs() {
-                document.getElementById("inputs-container").innerHTML = "";
-            }
+        function limparInputs() {
+            document.getElementById("inputs-container").innerHTML = "";
+        }
+        function getResult(result) {
+            const trResult = result.toFixed(2); 
+            const label = document.createElement("label");
+            label.textContent = `Turnaround: ${trResult}`;
+            document.getElementById("ResultLabel").appendChild(label);
+            return label;
 
-            document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
+        }
+        document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
 
             function getGraphic() {
                 let currentTimeline = 0;
@@ -150,17 +158,17 @@
 
                 Highcharts.ganttChart('container', {
 
-                    title: {
-                        text: 'Gantt Chart process scheduler',
-                        align: 'left'
-                    },
-                    chart: {
-                        borderColor: '#686868',
-                        borderWidth: 2,
-                        animation: {
-                            delay: 1000
-                        }
-                    },
+                title: {
+                    text: 'Gantt Chart process scheduler',
+                    align: 'left'
+                },
+                chart: {
+                    borderColor: '#686868',
+                    borderWidth: 2,
+                    animation: {
+                    defer: 1000
+                    }
+                },
 
                     xAxis: {
                         categories: Array.from({ length: 31 }, (_, i) => i), // Gera uma array de 0 a 30
@@ -192,8 +200,8 @@
 
         </script>
 
-        <div id="container"></div>
-    </div>
+    <div id="container"></div>
+</div>
 </body>
 
 </html>
