@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,176 +11,189 @@
     <title>Escalonador de processos</title>
 
 </head>
+
 <body>
     <div id="container_view">
-    <header id="cabecalho">Digite os dados do sistema e de cada processo</header>
-    <div id="inputs-container">
-        <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
-    </div> 
+        <header id="cabecalho">Digite os dados do sistema e de cada processo</header>
+        <div id="inputs-container">
+            <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
+        </div>
 
-    <script>
-        let numProcessos;
-        let quantum;
-        let sobrecarga;
-        let processes = [];
-        var header = document.getElementById("cabecalho");
-        
-        function pedirQuantidadeProcessos() {
-            numProcessos = parseInt(document.getElementById("quantidade-processos").value);
-            limparInputs();
-            pedirQuantum();
-        }
+        <script>
+            let numProcessos;
+            let quantum;
+            let sobrecarga;
+            let processes = [];
+            var header = document.getElementById("cabecalho");
 
-        function pedirQuantum() {
-            const inputQuantum = criarInput("number", "Valor do quantum");
-            inputQuantum.addEventListener("change", () => {
-                quantum = parseInt(inputQuantum.value);
+            function pedirQuantidadeProcessos() {
+                numProcessos = parseInt(document.getElementById("quantidade-processos").value);
                 limparInputs();
-                pedirSobrecarga();
-            });
-            document.getElementById("inputs-container").appendChild(inputQuantum);
-        }
-
-        function pedirSobrecarga() {
-            const inputSobrecarga = criarInput("number", "Valor da sobrecarga");
-            inputSobrecarga.addEventListener("change", () => {
-                sobrecarga = parseInt(inputSobrecarga.value);
-                limparInputs();
-                pedirProcessos(0);
-            });
-            document.getElementById("inputs-container").appendChild(inputSobrecarga);
-        }
-
-        function pedirProcessos(index) {
-            if (index < numProcessos) {
-                const inputTempoChegada = criarInput("number", `Tempo de chegada do processo ${index + 1}`);
-                const inputTempoExecucao = criarInput("number", `Tempo de execução do processo ${index + 1}`);
-                const inputDeadline = criarInput("number", `Deadline do processo ${index + 1}`);
-
-                const divProcesso = document.createElement("div");
-                divProcesso.appendChild(inputTempoChegada);
-                divProcesso.appendChild(inputTempoExecucao);
-                divProcesso.appendChild(inputDeadline);
-
-                document.getElementById("inputs-container").appendChild(divProcesso);
-
-                const proximoIndex = index + 1;
-
-                inputDeadline.addEventListener("change", () => {
-                    processes.push({
-                        arrival: parseInt(inputTempoChegada.value),
-                        execution: parseInt(inputTempoExecucao.value),
-                        deadline: parseInt(inputDeadline.value)
-                    });
-
-                    limparInputs();
-                    pedirProcessos(proximoIndex);
-                });
-            } else {
-                header.innerHTML = "Escolha o algoritmo de escalonamento";
-                console.log("Quantidade de Processos:", numProcessos);
-                console.log("Quantum:", quantum);
-                console.log("Sobrecarga:", sobrecarga);
-                console.log("Processos:", processes);
-
-                const calculator = new SchedulingCalculator(JSON.parse(JSON.stringify(processes)), quantum, sobrecarga);
-
-                const fifoResult = calculator.fifo();
-                console.log("Turnaround FIFO: ", fifoResult);
-                const sjfResult = calculator.sjf();
-                console.log("Turnaround SJF: ", sjfResult);
-                const roundRobinResult = calculator.roundRobin();
-                console.log("Turnaround Round Robin: ", roundRobinResult);
-                const edfResult = calculator.edf();
-                console.log("Turnaround EDF: ", edfResult);
-
-                const fifo = criarButton("FIFO", "1");
-                const sjf = criarButton("SJF", "2");
-                const roundRobin = criarButton("Round Robin", "3");
-                const edf = criarButton("EDF", "4");
-                document.getElementById("inputs-container").appendChild(fifo);
-                document.getElementById("inputs-container").appendChild(sjf);
-                document.getElementById("inputs-container").appendChild(roundRobin);
-                document.getElementById("inputs-container").appendChild(edf);
-
-                fifo.addEventListener("click", getGraphic);  
-                sjf.addEventListener("click", getGraphic);  
-                roundRobin.addEventListener("click", getGraphic);  
-                edf.addEventListener("click", getGraphic);        
+                pedirQuantum();
             }
-        }
 
-        function criarButton(title, id) {
-            const button = document.createElement("button");  
-            button.textContent = title; 
-            button.id = id;
-            return button;
-        }
+            function pedirQuantum() {
+                const inputQuantum = criarInput("number", "Valor do quantum");
+                inputQuantum.addEventListener("change", () => {
+                    quantum = parseInt(inputQuantum.value);
+                    limparInputs();
+                    pedirSobrecarga();
+                });
+                document.getElementById("inputs-container").appendChild(inputQuantum);
+            }
 
-        function criarInput(type, placeholder) {
-            const input = document.createElement("input");
-            input.type = type;
-            input.placeholder = placeholder;
-            return input;
-        }
+            function pedirSobrecarga() {
+                const inputSobrecarga = criarInput("number", "Valor da sobrecarga");
+                inputSobrecarga.addEventListener("change", () => {
+                    sobrecarga = parseInt(inputSobrecarga.value);
+                    limparInputs();
+                    pedirProcessos(0);
+                });
+                document.getElementById("inputs-container").appendChild(inputSobrecarga);
+            }
 
-        function limparInputs() {
-            document.getElementById("inputs-container").innerHTML = "";
-        }
+            function pedirProcessos(index) {
+                if (index < numProcessos) {
+                    const inputTempoChegada = criarInput("number", `Tempo de chegada do processo ${index + 1}`);
+                    const inputTempoExecucao = criarInput("number", `Tempo de execução do processo ${index + 1}`);
+                    const inputDeadline = criarInput("number", `Deadline do processo ${index + 1}`);
 
-        document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
+                    const divProcesso = document.createElement("div");
+                    divProcesso.appendChild(inputTempoChegada);
+                    divProcesso.appendChild(inputTempoExecucao);
+                    divProcesso.appendChild(inputDeadline);
 
-        function getGraphic() {
-            
-            Highcharts.ganttChart('container', {
+                    document.getElementById("inputs-container").appendChild(divProcesso);
 
-                title: {
-                    text: 'Gantt Chart process scheduler',
-                    align: 'left'
-                },
-                chart: {
-                    borderColor: '#686868',
-                    borderWidth: 2,
-                    animation: {
-                     delay: 1000
-                    }
-                },
+                    const proximoIndex = index + 1;
 
-                xAxis: {
-                    categories: Array.from({ length: 31 }, (_, i) => i), // Gera uma array de 0 a 30
-                    min: 0,
-                    max: 30,
-                },
-                tooltip: {
-                    formatter: function () {
-                        return '<b>' + 'Task: ' + this.point.name + '<br/>' +
-                            'Start: ' + this.point.start + '<br/>' +
-                            'End: ' + this.point.end;
-                    }
-                },
+                    inputDeadline.addEventListener("change", () => {
+                        processes.push({
+                            arrival: parseInt(inputTempoChegada.value),
+                            execution: parseInt(inputTempoExecucao.value),
+                            deadline: parseInt(inputDeadline.value)
+                        });
 
-                accessibility: {
-                    point: {
-                        descriptionFormat: '{yCategory}. ' +
-                            '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
-                            'Start {x}, end {x2}.'
-                    }
-                },
+                        limparInputs();
+                        pedirProcessos(proximoIndex);
+                    });
+                } else {
+                    header.innerHTML = "Escolha o algoritmo de escalonamento";
+                    console.log("Quantidade de Processos:", numProcessos);
+                    console.log("Quantum:", quantum);
+                    console.log("Sobrecarga:", sobrecarga);
+                    console.log("Processos:", processes);
 
-                series: [{
-                    name: 'Project 1',
-                    data: processes.map((item, index) => ({
+                    const calculator = new SchedulingCalculator(JSON.parse(JSON.stringify(processes)), quantum, sobrecarga);
+
+                    const fifoResult = calculator.fifo();
+                    console.log("Turnaround FIFO: ", fifoResult);
+                    const sjfResult = calculator.sjf();
+                    console.log("Turnaround SJF: ", sjfResult);
+                    const roundRobinResult = calculator.roundRobin();
+                    console.log("Turnaround Round Robin: ", roundRobinResult);
+                    const edfResult = calculator.edf();
+                    console.log("Turnaround EDF: ", edfResult);
+
+                    const fifo = criarButton("FIFO", "1");
+                    const sjf = criarButton("SJF", "2");
+                    const roundRobin = criarButton("Round Robin", "3");
+                    const edf = criarButton("EDF", "4");
+                    document.getElementById("inputs-container").appendChild(fifo);
+                    document.getElementById("inputs-container").appendChild(sjf);
+                    document.getElementById("inputs-container").appendChild(roundRobin);
+                    document.getElementById("inputs-container").appendChild(edf);
+
+                    fifo.addEventListener("click", getGraphic);
+                    sjf.addEventListener("click", getGraphic);
+                    roundRobin.addEventListener("click", getGraphic);
+                    edf.addEventListener("click", getGraphic);
+                }
+            }
+
+            function criarButton(title, id) {
+                const button = document.createElement("button");
+                button.textContent = title;
+                button.id = id;
+                return button;
+            }
+
+            function criarInput(type, placeholder) {
+                const input = document.createElement("input");
+                input.type = type;
+                input.placeholder = placeholder;
+                return input;
+            }
+
+            function limparInputs() {
+                document.getElementById("inputs-container").innerHTML = "";
+            }
+
+            document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
+
+            function getGraphic() {
+                let currentTimeline = 0;
+
+                const processChartData = processes.map((item, index) => {
+                    const start = currentTimeline;
+                    const end = start + item.execution;
+
+                    currentTimeline = end;
+
+                    return {
                         name: `Processo ${index + 1}`,
-                        start: item.arrival,
-                        end: item.execution,
-                    })),
-                }]
-            });
-        }
+                        start: start,
+                        end: end,
+                        color: '#65B307'
+                    };
+                });
 
-    </script>
+                Highcharts.ganttChart('container', {
 
-    <div id="container"></div>
-</div>
+                    title: {
+                        text: 'Gantt Chart process scheduler',
+                        align: 'left'
+                    },
+                    chart: {
+                        borderColor: '#686868',
+                        borderWidth: 2,
+                        animation: {
+                            delay: 1000
+                        }
+                    },
+
+                    xAxis: {
+                        categories: Array.from({ length: 31 }, (_, i) => i), // Gera uma array de 0 a 30
+                        min: 0,
+                        max: 30,
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + 'Task: ' + this.point.name + '<br/>' +
+                                'Start: ' + this.point.start + '<br/>' +
+                                'End: ' + this.point.end;
+                        }
+                    },
+
+                    accessibility: {
+                        point: {
+                            descriptionFormat: '{yCategory}. ' +
+                                '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
+                                'Start {x}, end {x2}.'
+                        }
+                    },
+
+                    series: [{
+                        name: 'Project 1',
+                        data: processChartData,
+                    }]
+                });
+            }
+
+        </script>
+
+        <div id="container"></div>
+    </div>
 </body>
+
 </html>
