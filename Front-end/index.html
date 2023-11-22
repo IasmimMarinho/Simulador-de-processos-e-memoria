@@ -152,111 +152,99 @@
 
                     currentTimeline = end;
 
-                    return [
-                        {
-                            name: `Espera ${index + 1}`,
-                            start: waitStart,
-                            end: waitEnd,
-                            color: '#FFFF00',
-                        },
-                        {
-                            name: `Processo ${index + 1}`,
-                            start: start,
-                            end: end,
-                            color: '#65B307',
-                        }
-                    ];
+                    if ((waitEnd - waitStart) == 0) {
+                        return [
+                            {
+                                name: `Processo ${index + 1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            }
+                        ];
+                    } else {
+                        return [
+                            {
+                                name: `Espera ${index + 1}`,
+                                start: waitStart,
+                                end: waitEnd,
+                                color: '#FFFF00',
+                            },
+                            {
+                                name: `Processo ${index + 1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            }
+                        ];
+                    }
                 }).flat();
 
-                Highcharts.ganttChart('container', {
-
-                    title: {
-                        text: 'Gantt Chart process scheduler',
-                        align: 'left'
-                    },
-
-                    chart: {
-                        borderColor: '#686868',
-                        borderWidth: 2,
-                        animation: {
-                            defer: 0
-                        }
-                    },
-
-                    xAxis: {
-                        categories: Array.from({ length: 31 }, (_, i) => i),
-                        min: 0,
-                        max: 30,
-                    },
-
-                    tooltip: {
-                        formatter: function () {
-                            return '<b>' + 'Task: ' + this.point.name + '<br/>' +
-                                'Start: ' + this.point.start + '<br/>' +
-                                'End: ' + this.point.end;
-                        }
-                    },
-
-                    accessibility: {
-                        point: {
-                            descriptionFormat: '{yCategory}. ' +
-                                '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
-                                'Start {x}, end {x2}.'
-                        }
-                    },
-
-                    series: [{
-                        name: 'Project 1',
-                        data: processChartData,
-                        animation: {
-                            defer: 0,
-                            duration: 20000
-                        }
-                    }]
-                });
-
-                document.getElementById("ResultLabel").innerHTML = "";
-                getResult(selectedAlgorithm)
+                getGraphic(processChartData);
             }
 
             function getGraphicSJF() {
                 let currentTimeline = 0;
                 let acc = 0;
 
+                processes.forEach((process) => {
+                    process.increment = 0;
+                });
+
                 const processChartData = processes.map((item, index) => {
                     let start = Math.max(currentTimeline, item.arrival);
                     let end = start + item.execution;
                     let waitStart = item.arrival;
                     let waitEnd = start;
+                    let icr = false;
 
-                    if (index < processes.length-1) {
-                        if (processes[index+1].arrival <= start && item.execution > processes[index+1].execution) {
-                            start += processes[index+1].execution;
-                            end += processes[index+1].execution;
-                            waitEnd += processes[index+1].execution;
-                            acc += item.execution;
-                        } else {
-                            currentTimeline = end + acc;
-                            acc = 0;
+                    if (index < processes.length - 1) {
+                        for (i = index; i < processes.length - 1; i++) {
+                            if (processes[i + 1].arrival <= start && item.execution > processes[i + 1].execution) {
+                                start += processes[i + 1].execution;
+                                end += processes[i + 1].execution;
+                                waitEnd += processes[i + 1].execution;
+                                processes[i].increment = 0;
+                                processes[i + 1].increment = item.execution;
+                                icr = true;
+                            }
+                        }
+
+                        if (!icr) {
+                            currentTimeline = end + item.increment;
                         }
                     }
 
-                    return [
-                        {
-                            name: `Espera ${index + 1}`,
-                            start: waitStart,
-                            end: waitEnd,
-                            color: '#FFFF00',
-                        },
-                        {
-                            name: `Processo ${index + 1}`,
-                            start: start,
-                            end: end,
-                            color: '#65B307',
-                        }
-                    ];
+                    if ((waitEnd - waitStart) == 0) {
+                        return [
+                            {
+                                name: `Processo ${index + 1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            }
+                        ];
+                    } else {
+                        return [
+                            {
+                                name: `Espera ${index + 1}`,
+                                start: waitStart,
+                                end: waitEnd,
+                                color: '#FFFF00',
+                            },
+                            {
+                                name: `Processo ${index + 1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            }
+                        ];
+                    }
                 }).flat();
 
+                getGraphic(processChartData)
+            }
+
+            function getGraphic(processChartData) {
                 Highcharts.ganttChart('container', {
 
                     title: {
@@ -307,7 +295,6 @@
                 document.getElementById("ResultLabel").innerHTML = "";
                 getResult(selectedAlgorithm);
             }
-
         </script>
 
         <div id="container"></div>
