@@ -19,19 +19,19 @@
             <input type="number" id="quantidade-processos" placeholder="Quantidade de processos">
         </div>
 
-    <script>
-        let numProcessos;
-        let quantum;
-        let sobrecarga;
-        let processes = [];
-        let selectedAlgorithm;
-        var header = document.getElementById("cabecalho");
-        
-        function pedirQuantidadeProcessos() {
-            numProcessos = parseInt(document.getElementById("quantidade-processos").value);
-            limparInputs();
-            pedirQuantum();
-        }
+        <script>
+            let numProcessos;
+            let quantum;
+            let sobrecarga;
+            let processes = [];
+            let selectedAlgorithm;
+            var header = document.getElementById("cabecalho");
+
+            function pedirQuantidadeProcessos() {
+                numProcessos = parseInt(document.getElementById("quantidade-processos").value);
+                limparInputs();
+                pedirQuantum();
+            }
 
             function pedirQuantum() {
                 const inputQuantum = criarInput("number", "Valor do quantum");
@@ -105,12 +105,12 @@
                     document.getElementById("inputs-container").appendChild(roundRobin);
                     document.getElementById("inputs-container").appendChild(edf);
 
-                fifo.addEventListener("click", () => { selectedAlgorithm = fifoResult; getGraphic(); });
-                sjf.addEventListener("click", () => { selectedAlgorithm = sjfResult; getGraphic(); });
-                roundRobin.addEventListener("click", () => { selectedAlgorithm = roundRobinResult; getGraphic(); });
-                edf.addEventListener("click", () => { selectedAlgorithm = edfResult; getGraphic(); });        
+                    fifo.addEventListener("click", () => { selectedAlgorithm = fifoResult; getGraphicFIFO(); });
+                    sjf.addEventListener("click", () => { selectedAlgorithm = sjfResult; getGraphicSJF(); });
+                    roundRobin.addEventListener("click", () => { selectedAlgorithm = roundRobinResult; getGraphicRoundRobin(); });
+                    edf.addEventListener("click", () => { selectedAlgorithm = edfResult; getGraphicEDF(); });
+                }
             }
-        }
 
             function criarButton(title, id) {
                 const button = document.createElement("button");
@@ -126,55 +126,69 @@
                 return input;
             }
 
-        function limparInputs() {
-            document.getElementById("inputs-container").innerHTML = "";
-        }
-        function getResult(result) {
-            const trResult = result.toFixed(2); 
-            const label = document.createElement("label");
-            label.textContent = `Turnaround: ${trResult}`;
-            document.getElementById("ResultLabel").appendChild(label);
-            return label;
+            function limparInputs() {
+                document.getElementById("inputs-container").innerHTML = "";
+            }
 
-        }
-        document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
+            function getResult(result) {
+                const trResult = result.toFixed(2);
+                const label = document.createElement("label");
+                label.textContent = `Turnaround: ${trResult}`;
+                document.getElementById("ResultLabel").appendChild(label);
+                return label;
 
-            function getGraphic() {
+            }
+
+            document.getElementById("quantidade-processos").addEventListener("change", pedirQuantidadeProcessos);
+
+            function getGraphicFIFO() {
                 let currentTimeline = 0;
 
                 const processChartData = processes.map((item, index) => {
                     const start = currentTimeline;
                     const end = start + item.execution;
+                    const waitStart = item.arrival;
+                    const waitEnd = start;
 
                     currentTimeline = end;
 
-                    return {
-                        name: `Processo ${index + 1}`,
-                        start: start,
-                        end: end,
-                        color: '#65B307'
-                    };
-                });
+                    return [
+                        {
+                            name: `Espera ${index + 1}`,
+                            start: waitStart,
+                            end: waitEnd,
+                            color: '#FFFF00',
+                        },
+                        {
+                            name: `Processo ${index + 1}`,
+                            start: start,
+                            end: end,
+                            color: '#65B307',
+                        }
+                    ];
+                }).flat();
 
                 Highcharts.ganttChart('container', {
 
-                title: {
-                    text: 'Gantt Chart process scheduler',
-                    align: 'left'
-                },
-                chart: {
-                    borderColor: '#686868',
-                    borderWidth: 2,
-                    animation: {
-                    defer: 1000
-                    }
-                },
+                    title: {
+                        text: 'Gantt Chart process scheduler',
+                        align: 'left'
+                    },
+
+                    chart: {
+                        borderColor: '#686868',
+                        borderWidth: 2,
+                        animation: {
+                            defer: 0
+                        }
+                    },
 
                     xAxis: {
-                        categories: Array.from({ length: 31 }, (_, i) => i), // Gera uma array de 0 a 30
+                        categories: Array.from({ length: 31 }, (_, i) => i),
                         min: 0,
                         max: 30,
                     },
+
                     tooltip: {
                         formatter: function () {
                             return '<b>' + 'Task: ' + this.point.name + '<br/>' +
@@ -194,14 +208,111 @@
                     series: [{
                         name: 'Project 1',
                         data: processChartData,
+                        animation: {
+                            defer: 0,
+                            duration: 20000
+                        }
                     }]
                 });
+
+                document.getElementById("ResultLabel").innerHTML = "";
+                getResult(selectedAlgorithm)
+            }
+
+            function getGraphicSJF() {
+                let currentTimeline = 0;
+                let acc = 0;
+
+                const processChartData = processes.map((item, index) => {
+                    let start = Math.max(currentTimeline, item.arrival);
+                    let end = start + item.execution;
+                    let waitStart = item.arrival;
+                    let waitEnd = start;
+
+                    if (index < processes.length-1) {
+                        if (processes[index+1].arrival <= start && item.execution > processes[index+1].execution) {
+                            start += processes[index+1].execution;
+                            end += processes[index+1].execution;
+                            waitEnd += processes[index+1].execution;
+                            acc += item.execution;
+                        } else {
+                            currentTimeline = end + acc;
+                            acc = 0;
+                        }
+                    }
+
+                    return [
+                        {
+                            name: `Espera ${index + 1}`,
+                            start: waitStart,
+                            end: waitEnd,
+                            color: '#FFFF00',
+                        },
+                        {
+                            name: `Processo ${index + 1}`,
+                            start: start,
+                            end: end,
+                            color: '#65B307',
+                        }
+                    ];
+                }).flat();
+
+                Highcharts.ganttChart('container', {
+
+                    title: {
+                        text: 'Gantt Chart process scheduler',
+                        align: 'left'
+                    },
+
+                    chart: {
+                        borderColor: '#686868',
+                        borderWidth: 2,
+                        animation: {
+                            defer: 0
+                        }
+                    },
+
+                    xAxis: {
+                        categories: Array.from({ length: 31 }, (_, i) => i),
+                        min: 0,
+                        max: 30,
+                    },
+
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + 'Task: ' + this.point.name + '<br/>' +
+                                'Start: ' + this.point.start + '<br/>' +
+                                'End: ' + this.point.end;
+                        }
+                    },
+
+                    accessibility: {
+                        point: {
+                            descriptionFormat: '{yCategory}. ' +
+                                '{#if completed}Task {(multiply completed.amount 100):.1f}% completed. {/if}' +
+                                'Start {x}, end {x2}.'
+                        }
+                    },
+
+                    series: [{
+                        name: 'Project 1',
+                        data: processChartData,
+                        animation: {
+                            defer: 0,
+                            duration: 20000
+                        }
+                    }]
+                });
+
+                document.getElementById("ResultLabel").innerHTML = "";
+                getResult(selectedAlgorithm);
             }
 
         </script>
 
-    <div id="container"></div>
-</div>
+        <div id="container"></div>
+    </div>
+    <label id="ResultLabel"></label>
 </body>
 
 </html>
