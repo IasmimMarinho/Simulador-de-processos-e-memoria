@@ -185,26 +185,27 @@
             function getGraphicSJF() {
                 let currentTimeline = 0;
                 let acc = 0;
+                let remaining = JSON.parse(JSON.stringify(processes));
 
-                processes.forEach((process) => {
+                remaining.forEach((process) => {
                     process.increment = 0;
                 });
 
-                const processChartData = processes.map((item, index) => {
+                const processChartData = remaining.map((item, index) => {
                     let start = Math.max(currentTimeline, item.arrival);
                     let end = start + item.execution;
                     let waitStart = item.arrival;
                     let waitEnd = start;
                     let icr = false;
 
-                    if (index < processes.length - 1) {
-                        for (i = index; i < processes.length - 1; i++) {
-                            if (processes[i + 1].arrival <= start && item.execution > processes[i + 1].execution) {
-                                start += processes[i + 1].execution;
-                                end += processes[i + 1].execution;
-                                waitEnd += processes[i + 1].execution;
-                                processes[i].increment = 0;
-                                processes[i + 1].increment = item.execution;
+                    if (index < remaining.length - 1) {
+                        for (i = index; i < remaining.length - 1; i++) {
+                            if (remaining[i + 1].arrival <= start && item.execution > remaining[i + 1].execution) {
+                                start += remaining[i + 1].execution;
+                                end += remaining[i + 1].execution;
+                                waitEnd += remaining[i + 1].execution;
+                                remaining[i].increment = 0;
+                                remaining[i + 1].increment = item.execution;
                                 icr = true;
                             }
                         }
@@ -248,12 +249,13 @@
                 let currentTimeline = 0;
                 let acc = 0;
                 let over;
+                let remaining = JSON.parse(JSON.stringify(processes));
 
-                processes.forEach((process) => {
+                remaining.forEach((process) => {
                     process.increment = 0;
                 });
 
-                const processChartData = processes.flatMap((item, index) => {
+                const processChartData = remaining.flatMap((item, index) => {
                     let results = [];
                     let count = 0;
 
@@ -265,14 +267,15 @@
                         let overStart;
                         let overEnd;
                         let icr = false;
+                        
                         if (count != 0) {
-                            for (i = index; i < processes.length - 1; i++) {
-                                if (processes[i + 1].arrival < item.arrival) {
-                                    start += processes[i + 1].execution;
-                                    end += processes[i + 1].execution;
-                                    waitEnd += processes[i + 1].execution;
-                                    processes[i].increment = 0;
-                                    processes[i + 1].increment = item.execution;
+                            for (i = index; i < remaining.length - 1; i++) {
+                                if (remaining[i+1].arrival < item.arrival) {
+                                    start += remaining[i+1].execution;
+                                    end += remaining[i+1].execution;
+                                    waitEnd += remaining[i+1].execution;
+                                    remaining[i].increment = 0;
+                                    remaining[i+1].increment = item.execution;
                                     icr = true;
                                 }
                             }
@@ -299,13 +302,13 @@
 
                         if (over && (waitEnd - waitStart) != 0) {
                             results.push({
-                                name: `Espera ${index + 1}`,
+                                name: `Espera ${index+1}`,
                                 start: waitStart,
                                 end: waitEnd,
                                 color: '#FFFF00',
                             });
                             results.push({
-                                name: `Processo ${index + 1}`,
+                                name: `Processo ${index+1}`,
                                 start: start,
                                 end: end,
                                 color: '#65B307',
@@ -318,7 +321,7 @@
                             });
                         } else if (over) {
                             results.push({
-                                name: `Processo ${index + 1}`,
+                                name: `Processo ${index+1}`,
                                 start: start,
                                 end: end,
                                 color: '#65B307',
@@ -331,20 +334,145 @@
                             });
                         } else if ((waitEnd - waitStart) != 0) {
                             results.push({
-                                name: `Espera ${index + 1}`,
+                                name: `Espera ${index+1}`,
                                 start: waitStart,
                                 end: waitEnd,
                                 color: '#FFFF00',
                             });
                             results.push({
-                                name: `Processo ${index + 1}`,
+                                name: `Processo ${index+1}`,
                                 start: start,
                                 end: end,
                                 color: '#65B307',
                             });
                         } else {
                             results.push({
-                                name: `Processo ${index + 1}`,
+                                name: `Processo ${index+1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            });
+                        }
+
+                        count += 1;
+                    }
+                    
+                    return results;
+                });
+                getGraphic(processChartData);
+            }
+
+            function getGraphicEDF() {
+                let currentTimeline = 0;
+                let acc = 0;
+                let over;
+                let remaining = JSON.parse(JSON.stringify(processes));
+
+                remaining.forEach((process) => {
+                    process.increment = 0;
+                    process.deadline += process.arrival;
+                });
+
+                const processChartData = remaining.flatMap((item, index) => {
+                    let results = [];
+                    let count = 0;
+
+                    while (item.execution > 0) {
+                        let start = Math.max(currentTimeline, item.arrival);
+                        let end;
+                        let waitStart = item.arrival;
+                        let waitEnd = start;
+                        let overStart;
+                        let overEnd;
+                        let icr = false;
+
+                        if (count != 0) {
+                            for (i = index; i < remaining.length - 1; i++) {
+                                if (remaining[i+1].arrival < item.arrival) {
+                                    start += remaining[i+1].execution;
+                                    end += remaining[i+1].execution;
+                                    waitEnd += remaining[i+1].execution;
+                                    remaining[i].increment = 0;
+                                    remaining[i+1].increment = item.execution;
+                                    icr = true;
+                                } else if ((remaining[i+1].arrival == item.arrival) && (remaining[i+1].deadline) < item.deadline) {
+                                    start += remaining[i+1].execution;
+                                    end += remaining[i+1].execution;
+                                    waitEnd += remaining[i+1].execution;
+                                    remaining[i].increment = 0;
+                                    remaining[i+1].increment = item.execution;
+                                    icr = true;
+                                }
+                            }
+                        }
+
+                        if (item.execution > quantum) {
+                            end = start + quantum;
+                            item.execution -= quantum;
+                            item.arrival = start + quantum + sobrecarga;
+                            if (!icr) {
+                                currentTimeline = item.arrival + item.increment;
+                            }
+                            over = true;
+                            overStart = end;
+                            overEnd = end + sobrecarga;
+                        } else {
+                            end = start + item.execution;
+                            item.execution = 0;
+                            if (!icr) {
+                                currentTimeline = end + item.increment;
+                            }
+                            over = false;
+                        }
+
+                        if (over && (waitEnd - waitStart) != 0) {
+                            results.push({
+                                name: `Espera ${index+1}`,
+                                start: waitStart,
+                                end: waitEnd,
+                                color: '#FFFF00',
+                            });
+                            results.push({
+                                name: `Processo ${index+1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            });
+                            results.push({
+                                name: `Sobrecarga`,
+                                start: overStart,
+                                end: overEnd,
+                                color: '#C21807',
+                            });
+                        } else if (over) {
+                            results.push({
+                                name: `Processo ${index+1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            });
+                            results.push({
+                                name: `Sobrecarga`,
+                                start: overStart,
+                                end: overEnd,
+                                color: '#C21807',
+                            });
+                        } else if ((waitEnd - waitStart) != 0) {
+                            results.push({
+                                name: `Espera ${index+1}`,
+                                start: waitStart,
+                                end: waitEnd,
+                                color: '#FFFF00',
+                            });
+                            results.push({
+                                name: `Processo ${index+1}`,
+                                start: start,
+                                end: end,
+                                color: '#65B307',
+                            });
+                        } else {
+                            results.push({
+                                name: `Processo ${index+1}`,
                                 start: start,
                                 end: end,
                                 color: '#65B307',
