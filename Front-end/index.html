@@ -7,6 +7,7 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/gantt.js"></script>
     <script src="../Back-end/scheludingCalculator.js"></script>
+    <!-- <script src="../Back-end/simulation.js"></script> -->
     <link rel="stylesheet" type="text/css" href="style.css" />
     <title>Escalonador de processos</title>
 
@@ -20,6 +21,101 @@
         </div>
 
         <script>
+            function substituicaoFIFO(frames, paginas) {
+    let paginaAtual = 0;
+    let fila = [];
+
+    return paginas.map((pagina) => {
+        if (!fila.includes(pagina)) {
+            if (fila.length < frames) {
+                fila.push(pagina);
+            } else {
+                const paginaSubstituida = fila.shift();
+                fila.push(pagina);
+                return paginaSubstituida;
+            }
+        }
+
+        return null;
+    });
+}
+
+function substituicaoLRU(frames, paginas) {
+    let fila = [];
+
+    return paginas.map((pagina, index) => {
+        if (!fila.includes(pagina)) {
+            if (fila.length < frames) {
+                fila.push(pagina);
+            } else {
+                const paginaSubstituida = fila.shift();
+                fila.push(pagina);
+
+                return paginaSubstituida;
+            }
+        } else {
+            fila = fila.filter((p) => p !== pagina);
+            fila.push(pagina);
+        }
+
+        return null;
+    });
+}
+
+
+function simularExecucao(frames, paginas, algoritmo) {
+    const usoRam = [];
+    const usoDisco = [];
+  
+    for (let i = 0; i < paginas.length; i++) {
+      const paginaAtual = paginas[i];
+  
+      if (usoRam.includes(paginaAtual)) {
+        usoDisco.push(null);
+      } else {
+        usoRam.push(paginaAtual);
+  
+        if (usoRam.length > frames) {
+          usoRam.shift();
+          usoDisco.push(null);
+        } else {
+          usoDisco.push(null);
+        }
+      }
+    }
+  
+    return usoRam;
+  }
+  
+    function gerarGanttChart(usoRam) {
+      const data = usoRam.map((processo, index) => ({
+        x: index,
+        y: processo === null ? 0 : 1,
+        name: processo === null ? 'Disco' : `RAM P${processo}`,
+        color: processo === null ? 'red' : 'green',
+      }));
+  
+      Highcharts.ganttChart('container2', {
+        series: [{
+          data: data,
+        }],
+        title: {
+          text: 'Gantt Chart - Substituição de Páginas',
+        },
+        xAxis: {
+          title: {
+            text: 'Steps',
+          },
+        },
+        yAxis: {
+          categories: ['Disco', 'RAM'],
+          title: {
+            text: 'Memória',
+          },
+        },
+      });
+  };
+
             let numProcessos;
             let quantum;
             let sobrecarga;
@@ -105,10 +201,33 @@
                     document.getElementById("inputs-container").appendChild(roundRobin);
                     document.getElementById("inputs-container").appendChild(edf);
 
-                    fifo.addEventListener("click", () => { selectedAlgorithm = fifoResult; getGraphicFIFO(); });
-                    sjf.addEventListener("click", () => { selectedAlgorithm = sjfResult; getGraphicSJF(); });
-                    roundRobin.addEventListener("click", () => { selectedAlgorithm = roundRobinResult; getGraphicRoundRobin(); });
-                    edf.addEventListener("click", () => { selectedAlgorithm = edfResult; getGraphicEDF(); });
+                    fifo.addEventListener("click", () => {
+  selectedAlgorithm = fifoResult;
+  getGraphicFIFO();
+  const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
+
+sjf.addEventListener("click", () => {
+  selectedAlgorithm = sjfResult;
+  getGraphicSJF();
+  const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
+
+roundRobin.addEventListener("click", () => {
+  selectedAlgorithm = roundRobinResult;
+  getGraphicRoundRobin();
+  const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
+
+edf.addEventListener("click", () => {
+  selectedAlgorithm = edfResult;
+  getGraphicEDF();
+  const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
                 }
             }
 
@@ -541,6 +660,7 @@
         </script>
 
         <div id="container"></div>
+        <div id="container2"></div>
     </div>
     <label id="ResultLabel"></label>
 </body>

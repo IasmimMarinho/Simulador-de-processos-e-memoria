@@ -1,3 +1,5 @@
+import * as Highcharts from 'https://code.highcharts.com/highcharts.js'
+
 function substituicaoFIFO(frames, paginas) {
     let paginaAtual = 0;
     let fila = [];
@@ -41,36 +43,69 @@ function substituicaoLRU(frames, paginas) {
 
 
 function simularExecucao(frames, paginas, algoritmo) {
-    const substituicoes = algoritmo(frames, paginas);
     const usoRam = [];
     const usoDisco = [];
-
+  
     for (let i = 0; i < paginas.length; i++) {
-        const paginaAtual = paginas[i];
-
-        if (usoRam.includes(paginaAtual)) {
-            usoDisco.push(null);
+      const paginaAtual = paginas[i];
+  
+      if (usoRam.includes(paginaAtual)) {
+        usoDisco.push(null);
+      } else {
+        usoRam.push(paginaAtual);
+  
+        if (usoRam.length > frames) {
+          usoRam.shift();
+          usoDisco.push(null);
         } else {
-            usoRam.push(paginaAtual);
-
-             if (usoRam.length > frames) {
-                const paginaSubstituida = substituicoes.shift();
-                usoRam.splice(usoRam.indexOf(paginaSubstituida), 1);
-                usoDisco.push(paginaSubstituida);
-            } else {
-                usoDisco.push(null);
-            }
+          usoDisco.push(null);
         }
+      }
     }
+  
+    return usoRam;
+  }
 
-    return { usoRam, usoDisco };
-}
-
-const frames = 3;
-const paginas = [1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5];
-
-const resultadoFIFO = simularExecucao(frames, paginas, substituicaoFIFO);
-const resultadoLRU = simularExecucao(frames, paginas, substituicaoLRU);
-
-console.log("Resultado FIFO:", resultadoFIFO);
-console.log("Resultado LRU:", resultadoLRU);
+  const script = document.createElement('script');
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    
+  document.head.appendChild(script);
+  });
+  
+  script.onload = function () {
+    function gerarGanttChart(usoRam) {
+      const data = usoRam.map((processo, index) => ({
+        x: index,
+        y: processo === null ? 0 : 1,
+        name: processo === null ? 'Disco' : `RAM P${processo}`,
+        color: processo === null ? 'red' : 'green',
+      }));
+  
+      Highcharts.ganttChart('ganttChart', {
+        series: [{
+          data: data,
+        }],
+        title: {
+          text: 'Gantt Chart - Substituição de Páginas',
+        },
+        xAxis: {
+          title: {
+            text: 'Steps',
+          },
+        },
+        yAxis: {
+          categories: ['Disco', 'RAM'],
+          title: {
+            text: 'Memória',
+          },
+        },
+      });
+    }
+  
+    const frames = 3;
+    const paginas = [1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5];
+  
+    const usoRam = simularExecucao(frames, paginas, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+  };
