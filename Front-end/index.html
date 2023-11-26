@@ -88,27 +88,35 @@ function simularExecucao(frames, paginas, algoritmo) {
   }
   
     function gerarGanttChart(usoRam) {
-      const data = usoRam.map((processo, index) => ({
-        x: index,
-        y: processo === null ? 0 : 1,
-        name: processo === null ? 'Disco' : `RAM P${processo}`,
-        color: processo === null ? 'red' : 'green',
+        console.log("UsoRam: ", usoRam);
+      var data = usoRam.map((processo, index) => ({
+        start: processo.arrival,
+        end: processo.arrival + processo.execution,
+        y: processo === null ? 0 : index + 1,
+        name: `RAM P${processo}`,
+        color: 'green',
       }));
-  
+
+      console.log(data);
+
       Highcharts.ganttChart('container2', {
         series: [{
           data: data,
+          animation: {
+                defer: 0,
+                duration: 20000
+            }
         }],
         title: {
           text: 'Gantt Chart - Substituição de Páginas',
         },
         xAxis: {
-          title: {
-            text: 'Steps',
-          },
+            categories: Array.from({ length: 31 }, (_, i) => i),
+            min: 0,
+            max: 30,
         },
         yAxis: {
-          categories: ['Disco', 'RAM'],
+          categories: ['RAM'],
           title: {
             text: 'Memória',
           },
@@ -205,7 +213,7 @@ function simularExecucao(frames, paginas, algoritmo) {
   selectedAlgorithm = fifoResult;
   getGraphicFIFO();
   const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
-    gerarGanttChart(usoRam);
+  gerarGanttChart(usoRam);
 });
 
 sjf.addEventListener("click", () => {
@@ -297,6 +305,7 @@ edf.addEventListener("click", () => {
                         ];
                     }
                 }).flat();
+                console.log(processChartData);
 
                 getGraphic(processChartData);
             }
@@ -607,6 +616,7 @@ edf.addEventListener("click", () => {
             }
 
             function getGraphic(processChartData) {
+                console.log("processChartData: ", processChartData);
                 Highcharts.ganttChart('container', {
 
                     title: {
