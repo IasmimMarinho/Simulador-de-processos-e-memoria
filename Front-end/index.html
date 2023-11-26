@@ -64,9 +64,10 @@ function substituicaoLRU(frames, paginas) {
 
 
 function simularExecucao(frames, paginas, algoritmo) {
-    const usoRam = [];
-    const usoDisco = [];
-  
+    var usoRam = [];
+    var usoDisco = [];
+    
+    
     for (let i = 0; i < paginas.length; i++) {
       const paginaAtual = paginas[i];
   
@@ -83,12 +84,14 @@ function simularExecucao(frames, paginas, algoritmo) {
         }
       }
     }
-  
+    
+    usoRam = algoritmo(frames, paginas);
+    usoRam.shift()
     return usoRam;
   }
   
     function gerarGanttChart(usoRam) {
-        console.log("UsoRam: ", usoRam);
+
       var data = usoRam.map((processo, index) => ({
         start: processo.arrival,
         end: processo.arrival + processo.execution,
@@ -111,9 +114,9 @@ function simularExecucao(frames, paginas, algoritmo) {
           text: 'Gantt Chart - Substituição de Páginas',
         },
         xAxis: {
-            categories: Array.from({ length: 31 }, (_, i) => i),
+            categories: Array.from({ length: 7 }, (_, i) => i),
             min: 0,
-            max: 30,
+            max: 7,
         },
         yAxis: {
           categories: ['RAM'],
@@ -204,10 +207,14 @@ function simularExecucao(frames, paginas, algoritmo) {
                     const sjf = criarButton("SJF", "2");
                     const roundRobin = criarButton("Round Robin", "3");
                     const edf = criarButton("EDF", "4");
+                    const pFifo = criarButton("Paginação FiFo", "5");
+                    const pLRU = criarButton("Paginação LRU", "6");
                     document.getElementById("inputs-container").appendChild(fifo);
                     document.getElementById("inputs-container").appendChild(sjf);
                     document.getElementById("inputs-container").appendChild(roundRobin);
                     document.getElementById("inputs-container").appendChild(edf);
+                    document.getElementById("inputs-container").appendChild(pFifo);
+                    document.getElementById("inputs-container").appendChild(pLRU);
 
                     fifo.addEventListener("click", () => {
   selectedAlgorithm = fifoResult;
@@ -234,6 +241,20 @@ edf.addEventListener("click", () => {
   selectedAlgorithm = edfResult;
   getGraphicEDF();
   const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
+
+pFifo.addEventListener("click", () => {
+  selectedAlgorithm = edfResult;
+//   getGraphicEDF();  
+  const usoRam = simularExecucao(frames, processes, substituicaoFIFO);
+    gerarGanttChart(usoRam);
+});
+
+pLRU.addEventListener("click", () => {
+  selectedAlgorithm = edfResult;
+//   getGraphicEDF();
+  const usoRam = simularExecucao(frames, processes, substituicaoLRU);
     gerarGanttChart(usoRam);
 });
                 }
